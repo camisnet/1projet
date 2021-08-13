@@ -6,13 +6,16 @@ const buscar = document.querySelector("#buscar");
 const id = document.querySelector("#id");
 const alterar = document.querySelector("#alterar");
 const deletar = document.querySelector("#deletar");
+const codigo = document.querySelector("#codigo");
+const apagar = document.querySelector("#apagar");
 
+
+//Registrar uma pessoa
 cadastrar.addEventListener("click", function(){
+  conexao();
   let formdata = new FormData();
 formdata.append('nome', `${nome.value}`);
 formdata.append('curso', `${curso.value}`);
-
-//Registrar uma pessoa
 fetch("https://www.jussimarleal.com.br/exemplo_api/pessoa",
   {
      body: formdata,
@@ -24,9 +27,11 @@ fetch("https://www.jussimarleal.com.br/exemplo_api/pessoa",
           limparCampos();
                }
     );
+  
 });
 //met listar uma pessoa
 buscar.addEventListener("click", function(){
+  conexao();
   fetch(`https://www.jussimarleal.com.br/exemplo_api/pessoa/${id.value}`,{
     method:"get",
     mode:'cors', 
@@ -40,6 +45,7 @@ buscar.addEventListener("click", function(){
 })
 //alterar dados
 alterar.addEventListener("click", function(){
+  conexao();
   fetch(`https://www.jussimarleal.com.br/exemplo_api/pessoa/${id.value}`,{
    method:"put",
    mode:'cors', 
@@ -56,8 +62,10 @@ alterar.addEventListener("click", function(){
     limparCampos();
   });
 });
+
 //metodo deletar registro
 deletar.addEventListener("click", function(){
+  conexao();
   fetch(`https://www.jussimarleal.com.br/exemplo_api/pessoa/${id.value}`,{
     method:"delete",
     mode:'cors', 
@@ -67,8 +75,71 @@ deletar.addEventListener("click", function(){
 
 //met limpar campos
 function limparCampos(){
+  conexao();
   nome.value = "";
   curso.value = "";
+  id.value = "";
+  }
+
+codigo.addEventListener("click", function(){
+  conexao();
+   cordova.plugins.barcodeScanner.scan(
+      function (result) {
+  fetch(`https://www.jussimarleal.com.br/exemplo_api/pessoa/${result.text}`,{
+    method:"get",
+    mode:'cors', 
+    cache:'default'
+  }).then(response=>{
+    response.json().then(data => {
+      id.value = data['id'];
+      nome.value = data['nome'];
+      curso.value = data['curso'];
+    })
+  })
+},
+  function (error) {
+          alert("Erro encontrado: " + error);
+      },
+  {
+          preferFrontCamera : false,
+          showFlipCameraButton : true, 
+          showTorchButton : true, 
+          torchOn: true, 
+          saveHistory: true, 
+          prompt : "Place a barcode inside the scan area",
+          resultDisplayDuration: 500, 
+          formats : "QR_CODE,PDF_417", 
+          orientation : "landscape", 
+          disableAnimations : true, 
+          disableSuccessBeep: false 
+      }
+   );
+});
+
+apagar.addEventListener("click", function(){
+  conexao();
+  limparCampos();
+})
+
+function conexao() {
+    var networkState = navigator.connection.type;
+
+  if (networkState == Connection.NONE){
+    function conexao(buttonIndex){
+       if(buttonIndex == "2"){
+      navigator.app.exitApp();
+       }
+
+    }
+   navigator.notification.confirm(
+    "Por favor, verifique sua conexão com a internet",
+     conexao,
+    "Conexão de internet indísponivel",
+    ['Tentar Novamente','Sair']
+     );
   }
 }
+}
+
+
 
